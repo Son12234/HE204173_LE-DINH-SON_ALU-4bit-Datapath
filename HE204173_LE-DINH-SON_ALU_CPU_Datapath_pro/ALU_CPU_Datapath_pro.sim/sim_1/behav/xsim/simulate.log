@@ -1,0 +1,159 @@
+Time resolution is 1 ps
+
+===== TEST 1: demonstration program (program.mem) =====
+  cycle  1 | IF: addr  0 | ID: bubble        | EX: bubble        | R1=0000 R2=0000 R3=0000
+  cycle  2 | IF: addr  1 | ID: 645 (addr  0) | EX: bubble        | R1=0000 R2=0000 R3=0000
+  cycle  3 | IF: addr  2 | ID: 683 (addr  1) | EX: 645 (addr  0) | R1=0000 R2=0000 R3=0000
+  cycle  4 | IF: addr  3 | ID: 060 (addr  2) | EX: 683 (addr  1) | R1=0101 R2=0000 R3=0000
+  cycle  5 | IF: addr  4 | ID: 6ca (addr  3) | EX: 060 (addr  2) | R1=0101 R2=0011 R3=0000
+PASS ADD R1,R2 -> R1 (5+3) = 1000
+  cycle  6 | IF: addr  5 | ID: 470 (addr  4) | EX: 6ca (addr  3) | R1=1000 R2=0011 R3=0000
+  cycle  7 | IF: addr  6 | ID: a05 (addr  5) | EX: 470 (addr  4) | R1=1000 R2=0011 R3=1010
+PASS LDI R3,1010 -> R3 = 1010
+PASS XOR R1,R3 -> R1 = 0010
+PASS R2 still 0011 = 0011
+  5 instructions finished after 7 clock cycles
+  cycle  8 | IF: addr  7 | ID: c00 (addr  6) | EX: a05 (addr  5) | R1=0010 R2=0011 R3=1010
+PASS JMP 0101: PC (fetch address) = 5 = 0101
+  cycle  9 | IF: addr  5 | ID: bubble        | EX: bubble        | R1=0010 R2=0011 R3=1010
+  cycle 10 | IF: addr  6 | ID: a05 (addr  5) | EX: bubble        | R1=0010 R2=0011 R3=1010
+  cycle 11 | IF: addr  7 | ID: c00 (addr  6) | EX: a05 (addr  5) | R1=0010 R2=0011 R3=1010
+PASS JMP runs again: program loops at 5 = 0101
+
+===== TEST 2: arithmetic and memory (prog_arith.mem) =====
+  EX addr  0: 645 | R0=0000 R1=0000 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  1: 683 | R0=0000 R1=0101 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  2: 060 | R0=0000 R1=0101 R2=0011 R3=0000 | Z=0 C=0
+PASS ADD R1,R2 (0101+0011) -> R1 = 1000
+PASS ADD: Carry = 0
+PASS ADD: Zero = 0
+  EX addr  3: 940 | R0=0000 R1=1000 R2=0011 R3=0000 | Z=0 C=0
+PASS STORE R1,0 -> data_memory[0] = 1000
+  EX addr  4: 645 | R0=0000 R1=1000 R2=0011 R3=0000 | Z=0 C=0
+  EX addr  5: 160 | R0=0000 R1=0101 R2=0011 R3=0000 | Z=0 C=0
+PASS SUB R1,R2 (0101-0011) -> R1 = 0010
+PASS SUB: Zero = 0
+PASS SUB: Carry (1 = no borrow) = 1
+  EX addr  6: 941 | R0=0000 R1=0010 R2=0011 R3=0000 | Z=0 C=1
+PASS STORE R1,1 -> data_memory[1] = 0010
+  EX addr  7: 800 | R0=0000 R1=0010 R2=0011 R3=0000 | Z=0 C=1
+PASS LOAD R0,0 -> R0 = 1000
+  EX addr  8: 1a0 | R0=1000 R1=0010 R2=0011 R3=0000 | Z=0 C=1
+PASS SUB R2,R2 -> R2 = 0000
+PASS Zero flag after 0000 result = 1
+  9 instructions finished after 11 clock cycles (pipeline: 9 + 2)
+
+===== TEST 3: logic operations (prog_logic.mem) =====
+  EX addr  0: 64c | R0=0000 R1=0000 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  1: 68a | R0=0000 R1=1100 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  2: 7d0 | R0=0000 R1=1100 R2=1010 R3=0000 | Z=0 C=0
+  EX addr  3: 2e0 | R0=0000 R1=1100 R2=1010 R3=1100 | Z=0 C=0
+PASS AND 1100,1010 -> R3 = 1000
+  EX addr  4: 7d0 | R0=0000 R1=1100 R2=1010 R3=1000 | Z=0 C=0
+  EX addr  5: 3e0 | R0=0000 R1=1100 R2=1010 R3=1100 | Z=0 C=0
+PASS OR 1100,1010 -> R3 = 1110
+  EX addr  6: 460 | R0=0000 R1=1100 R2=1010 R3=1110 | Z=0 C=0
+PASS XOR 1100,1010 -> R1 = 0110
+  EX addr  7: 790 | R0=0000 R1=0110 R2=1010 R3=1110 | Z=0 C=0
+PASS MOV R2,R1 (R1=0110) -> R2 = 0110
+  EX addr  8: 605 | R0=0000 R1=0110 R2=0110 R3=1110 | Z=0 C=0
+  EX addr  9: 500 | R0=0101 R1=0110 R2=0110 R3=1110 | Z=0 C=0
+PASS NOT 0101 -> R0 = 1010
+  EX addr 10: 6ca | R0=1010 R1=0110 R2=0110 R3=1110 | Z=0 C=0
+PASS LDI R3,1010 -> R3 = 1010
+  EX addr 11: 4f0 | R0=1010 R1=0110 R2=0110 R3=1010 | Z=0 C=0
+PASS XOR R3,R3 -> R3 = 0000
+PASS Zero flag after 0000 result = 1
+  12 instructions finished after 14 clock cycles (pipeline: 12 + 2)
+
+===== TEST 4: PC and jumps (prog_jump.mem) =====
+PASS PC after reset = 0000
+PASS PC increment (0 -> 1) = 0001
+  EX addr  0: 601 | R0=0000 R1=0000 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  1: a04 | R0=0001 R1=0000 R2=0000 R3=0000 | Z=0 C=0
+PASS JMP 4: PC becomes 0100 = 0100
+PASS JMP flushed the ID/EX register = 0
+  EX addr  4: 647 | R0=0001 R1=0000 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  5: 150 | R0=0001 R1=0111 R2=0000 R3=0000 | Z=0 C=0
+PASS SUB R1,R1 sets Zero = 1
+  EX addr  6: b09 | R0=0001 R1=0000 R2=0000 R3=0000 | Z=1 C=1
+PASS JZ 9 taken: PC = 9 = 1001
+  EX addr  9: 6c2 | R0=0001 R1=0000 R2=0000 R3=0000 | Z=1 C=1
+  EX addr 10: 0f0 | R0=0001 R1=0000 R2=0000 R3=0010 | Z=1 C=1
+PASS ADD R3,R3 clears Zero = 0
+  EX addr 11: b0e | R0=0001 R1=0000 R2=0000 R3=0100 | Z=0 C=0
+PASS JZ 14 not taken: next in EX is addr 12 = 1100
+  EX addr 12: 686 | R0=0001 R1=0000 R2=0000 R3=0100 | Z=0 C=0
+  EX addr 13: a0d | R0=0001 R1=0000 R2=0110 R3=0100 | Z=0 C=0
+PASS R0 = 1 (JMP skipped addresses 2, 3) = 0001
+PASS R2 = 6 (JZ skipped 7, 8; 14 never ran) = 0110
+PASS Program stops at PC = 13 = 1101
+
+===== TEST 5: reset =====
+PASS PC after reset = 0000
+PASS R0 after reset = 0000
+PASS R2 after reset = 0000
+PASS Zero after reset = 0
+PASS Carry after reset = 0
+PASS IF/ID empty after reset = 0
+PASS ID/EX empty after reset = 0
+  EX addr  0: 601 | R0=0000 R1=0000 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  1: a04 | R0=0001 R1=0000 R2=0000 R3=0000 | Z=0 C=0
+PASS no unknown (X) values on key outputs or registers
+
+==================================================
+tb_cpu PASSED: 44 of 44 checks OK
+==================================================
+
+$finish called at time : 666 ns : File "C:/Users/admin/Downloads/ALU_CPU_Datapath_pro/ALU_CPU_Datapath_pro.srcs/sim_1/imports/cpu4/tb_cpu.v" Line 226
+
+===== TEST 1: demonstration program (program.mem) =====
+  cycle  1 | IF: addr  0 | ID: bubble        | EX: bubble        | R1=0000 R2=0000 R3=0000
+  cycle  2 | IF: addr  1 | ID: 645 (addr  0) | EX: bubble        | R1=0000 R2=0000 R3=0000
+  cycle  3 | IF: addr  2 | ID: 683 (addr  1) | EX: 645 (addr  0) | R1=0000 R2=0000 R3=0000
+  cycle  4 | IF: addr  3 | ID: 060 (addr  2) | EX: 683 (addr  1) | R1=0101 R2=0000 R3=0000
+  cycle  5 | IF: addr  4 | ID: 6ca (addr  3) | EX: 060 (addr  2) | R1=0101 R2=0011 R3=0000
+PASS ADD R1,R2 -> R1 (5+3) = 1000
+  cycle  6 | IF: addr  5 | ID: 470 (addr  4) | EX: 6ca (addr  3) | R1=1000 R2=0011 R3=0000
+  cycle  7 | IF: addr  6 | ID: a05 (addr  5) | EX: 470 (addr  4) | R1=1000 R2=0011 R3=1010
+PASS LDI R3,1010 -> R3 = 1010
+PASS XOR R1,R3 -> R1 = 0010
+PASS R2 still 0011 = 0011
+  5 instructions finished after 7 clock cycles
+  cycle  8 | IF: addr  7 | ID: c00 (addr  6) | EX: a05 (addr  5) | R1=0010 R2=0011 R3=1010
+PASS JMP 0101: PC (fetch address) = 5 = 0101
+  cycle  9 | IF: addr  5 | ID: bubble        | EX: bubble        | R1=0010 R2=0011 R3=1010
+  cycle 10 | IF: addr  6 | ID: a05 (addr  5) | EX: bubble        | R1=0010 R2=0011 R3=1010
+  cycle 11 | IF: addr  7 | ID: c00 (addr  6) | EX: a05 (addr  5) | R1=0010 R2=0011 R3=1010
+PASS JMP runs again: program loops at 5 = 0101
+
+===== TEST 2: arithmetic and memory (prog_arith.mem) =====
+
+===== TEST 1: demonstration program (program.mem) =====
+  cycle  1 | IF: addr  0 | ID: bubble        | EX: bubble        | R1=0000 R2=0000 R3=0000
+  cycle  2 | IF: addr  1 | ID: 645 (addr  0) | EX: bubble        | R1=0000 R2=0000 R3=0000
+  cycle  3 | IF: addr  2 | ID: 683 (addr  1) | EX: 645 (addr  0) | R1=0000 R2=0000 R3=0000
+  cycle  4 | IF: addr  3 | ID: 060 (addr  2) | EX: 683 (addr  1) | R1=0101 R2=0000 R3=0000
+  cycle  5 | IF: addr  4 | ID: 6ca (addr  3) | EX: 060 (addr  2) | R1=0101 R2=0011 R3=0000
+PASS ADD R1,R2 -> R1 (5+3) = 1000
+  cycle  6 | IF: addr  5 | ID: 470 (addr  4) | EX: 6ca (addr  3) | R1=1000 R2=0011 R3=0000
+  cycle  7 | IF: addr  6 | ID: a05 (addr  5) | EX: 470 (addr  4) | R1=1000 R2=0011 R3=1010
+PASS LDI R3,1010 -> R3 = 1010
+PASS XOR R1,R3 -> R1 = 0010
+PASS R2 still 0011 = 0011
+  5 instructions finished after 7 clock cycles
+  cycle  8 | IF: addr  7 | ID: c00 (addr  6) | EX: a05 (addr  5) | R1=0010 R2=0011 R3=1010
+PASS JMP 0101: PC (fetch address) = 5 = 0101
+  cycle  9 | IF: addr  5 | ID: bubble        | EX: bubble        | R1=0010 R2=0011 R3=1010
+  cycle 10 | IF: addr  6 | ID: a05 (addr  5) | EX: bubble        | R1=0010 R2=0011 R3=1010
+  cycle 11 | IF: addr  7 | ID: c00 (addr  6) | EX: a05 (addr  5) | R1=0010 R2=0011 R3=1010
+PASS JMP runs again: program loops at 5 = 0101
+
+===== TEST 2: arithmetic and memory (prog_arith.mem) =====
+  EX addr  0: 645 | R0=0000 R1=0000 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  1: 683 | R0=0000 R1=0101 R2=0000 R3=0000 | Z=0 C=0
+  EX addr  2: 060 | R0=0000 R1=0101 R2=0011 R3=0000 | Z=0 C=0
+PASS ADD R1,R2 (0101+0011) -> R1 = 1000
+PASS ADD: Carry = 0
+PASS ADD: Zero = 0
+  EX addr  3: 940 | R0=0000 R1=1000 R2=0011 R3=0000 | Z=0 C=0
